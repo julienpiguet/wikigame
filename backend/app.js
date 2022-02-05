@@ -27,7 +27,7 @@ app.get('/random', (req, res) => {
       res.send({ data });
     },
     (err) => {
-      console.log("Error: " + err.message);
+      console.error("Error: " + err.message);
       res.statusCode = 500;
       res.end("Error: " + err.message);
     }
