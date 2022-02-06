@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Wikigame</title>
+</head>
+
+<body>
+    <form id="create" action="">
+        <button>Create</button>
+    </form>
+    <form id="join" action="">
+        <input id="input" autocomplete="off" /><button>Join</button>
+    </form>
+    <ul id="log"></ul>
+</body>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    var socket = io();
+
+
+    var create = document.getElementById('create');
+    var join = document.getElementById('join');
+    var input = document.getElementById('input');
+
+    join.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (input.value) {
+            socket.emit('join', input.value);
+            input.value = '';
+        }
+    });
+    create.addEventListener('submit', function (e) {
+        e.preventDefault();
+        socket.emit('create');
+        alert('Created')
+    });
+
+    var log = document.getElementById('log');
+    socket.on('log', function (msg) {
+        var item = document.createElement('li');
+        item.textContent = msg;
+        log.appendChild(item);
+    });
+</script>
+
+</html>
