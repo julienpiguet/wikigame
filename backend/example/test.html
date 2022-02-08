@@ -9,6 +9,9 @@
     <form id="create" action="">
         <button>Create</button>
     </form>
+    <form id="leave" action="">
+        <button>Leave</button>
+    </form>
     <form id="join" action="">
         <input id="input" autocomplete="off" /><button>Join</button>
     </form>
@@ -20,6 +23,7 @@
 
 
     var create = document.getElementById('create');
+    var leave = document.getElementById('leave');
     var join = document.getElementById('join');
     var input = document.getElementById('input');
 
@@ -33,6 +37,10 @@
     create.addEventListener('submit', function (e) {
         e.preventDefault();
         socket.emit('create');
+    });
+    leave.addEventListener('submit', function (e) {
+        e.preventDefault();
+        socket.emit('leave');
         //alert('Created')
     });
 
@@ -40,6 +48,13 @@
     socket.on('log', function (msg) {
         var item = document.createElement('li');
         item.textContent = msg;
+        log.appendChild(item);
+    });
+
+    socket.on('err', function (msg) {
+        var item = document.createElement('li');
+        item.textContent = msg;
+        item.style.color = "red"
         log.appendChild(item);
     });
 </script>

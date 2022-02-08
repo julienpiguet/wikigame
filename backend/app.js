@@ -88,7 +88,7 @@ class Game {
     return new Promise( function (resolve, reject){
       var id = utils.generateId(10);
       console.log('Create room: ' + id);
-      var room = new Room(io, id);
+      var room = new Room(id);
       room.addPlayer(player);
       rooms.push(room);
       resolve(room);
@@ -101,9 +101,7 @@ class Game {
         rooms.forEach((room, index, array) => {
           if (room.id == roomId) {
             if (!room.contains(player)){
-              //room.sendMsg("log", "New user in room");
               room.addPlayer(player)
-              //socket.emit("log", "Room joined");
               resolve(room)
             } else {
               reject("Already in room")
@@ -118,9 +116,11 @@ class Game {
 }
 
 class Room {
-  constructor(io, id) {
+  constructor(id) {
     this.players = [];
     this.id = id;
+    this.leader = null
+    this.scoreboard = []
   }
   addPlayer(player) {
     this.players.push(player);
@@ -129,10 +129,13 @@ class Room {
     utils.arrayRemove(this.players, player);
   }
   contains(player){
-    return this.players.find( elm => elm == player) != undefined
+    return this.players.includes(player);
   }
-  sendMsg(type,msg) {
-    this.players.forEach( (player) => player.socket.emit(type, msg));
+  sendMsg(type,msg, exclude = []) {
+    this.players.forEach( (player) => {
+      if (!exclude.includes(player))
+        player.socket.emit(type, msg);
+    });
   }
 }
 
@@ -143,26 +146,37 @@ class Player {
     this.room = null;
 
     socket.on('create', () => {
+      if (this.room){
+        this.socket.emit('err', 'Already in room')
+        return
+      }
       game.createRoom(this).then(
         (room) => {
           this.room = room;
           room.sendMsg("log", 'Room created with id: '+ room.id);
         },
-        (err) => socket.emit('log', err))
+        (err) => socket.emit('err', err))
     });
     socket.on('join', (id) => {
       game.joinRoom(this,id).then(
         (room) => {
           this.room = room;
-          room.sendMsg("log", this.id + ' joined the room');
+          room.sendMsg("log", this.id + ' joined the room', [this]);
+          this.socket.emit('log', 'Room joined')
         },
-        (err) => socket.emit('log', err)
+        (err) => socket.emit('err', err)
       )
     });
 
     socket.on('leave', () => {
-      game.rooms.forEach(room => utils.arrayRemove(room.player_sockets, socket));
-      socket.emit("log", "Leave room");
+      if (this.room) {
+        this.room.removePlayer(this);
+        this.room = null;
+        socket.emit("log", "Room left");
+      } else {
+        socket.emit("err", "No current room");
+      }
+      
     })
 
     console.log('User '+this.id+' connected')
