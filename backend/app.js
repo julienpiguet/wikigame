@@ -7,6 +7,7 @@ const { Server } = require("socket.io");
 const io = new Server(server);
 const dns = require('dns');
 dns.setServers(['8.8.8.8']);
+const { v4: uuidv4 } = require('uuid')
 
 const wiki = require('./wiki.js')
 const utils = require('./utils.js');
@@ -67,61 +68,106 @@ io.on('connection', (socket) => {
  ****************************************/
 
 class Game {
+
   constructor(io) {
     this.rooms = [];
     this.io = io;
+    this.players = [];
 
     io.on('connection', (socket) => {
-      socket.on('create', () => {
-        var id = utils.generateId(10);
-        console.log('Create room: ' + id);
-        var room = new Room(io, id);
-        room.addPlayer(socket);
-        this.rooms.push(room);
-        room.sendMsg("log", 'Room created with id: '+ id)
-      });
-      socket.on('join', (id) => {
-        var added = false;
-        this.rooms.forEach((room, index, array) => {
-          if (room.id == id) {
-            if (room.player_sockets.find( element => element == socket) == undefined){
-              room.sendMsg("log", "New user in room");
-              room.player_sockets.push(socket)
-              socket.emit("log", "Room joined");
+      this.players.push(new Player(this, socket));
+    });
+
+    io.on('disconnect', (socket) => {
+      console.log('Socket '+ socket.id +' disconected');
+    });
+
+  }
+  createRoom(player){
+    var rooms = this.rooms
+    return new Promise( function (resolve, reject){
+      var id = utils.generateId(10);
+      console.log('Create room: ' + id);
+      var room = new Room(io, id);
+      room.addPlayer(player);
+      rooms.push(room);
+      resolve(room);
+    });
+  }
+  joinRoom(player, roomId){
+    var rooms = this.rooms
+    return new Promise( function (resolve, reject){
+      var added = false;
+        rooms.forEach((room, index, array) => {
+          if (room.id == roomId) {
+            if (!room.contains(player)){
+              //room.sendMsg("log", "New user in room");
+              room.addPlayer(player)
+              //socket.emit("log", "Room joined");
+              resolve(room)
             } else {
-              socket.emit("log", "Already in room");
+              reject("Already in room")
             }
             added = true;
           }
         })
-        if (!added) socket.emit("log", "Room not found");
-      });
-
-      socket.on('leave', () => {
-        this.rooms.forEach(room => utils.arrayRemove(room.player_sockets, socket));
-        socket.emit("log", "Leave room");
-      })
+        if (!added) reject("Room not found"); 
     });
-
+    
   }
 }
 
 class Room {
   constructor(io, id) {
-    this.player_sockets = [];
+    this.players = [];
     this.id = id;
   }
-  addPlayer(socket) {
-    this.player_sockets.push(socket);
+  addPlayer(player) {
+    this.players.push(player);
   }
-  removePlayer(socket) {
-    utils.arrayRemove(this.player_sockets, socket);
+  removePlayer(player) {
+    utils.arrayRemove(this.players, player);
+  }
+  contains(player){
+    return this.players.find( elm => elm == player) != undefined
   }
   sendMsg(type,msg) {
-    this.player_sockets.forEach( (socket) => socket.emit(type, msg));
+    this.players.forEach( (player) => player.socket.emit(type, msg));
   }
 }
 
+class Player {
+  constructor(game, socket){
+    this.id = uuidv4();
+    this.socket = socket;
+    this.room = null;
+
+    socket.on('create', () => {
+      game.createRoom(this).then(
+        (room) => {
+          this.room = room;
+          room.sendMsg("log", 'Room created with id: '+ room.id);
+        },
+        (err) => socket.emit('log', err))
+    });
+    socket.on('join', (id) => {
+      game.joinRoom(this,id).then(
+        (room) => {
+          this.room = room;
+          room.sendMsg("log", this.id + ' joined the room');
+        },
+        (err) => socket.emit('log', err)
+      )
+    });
+
+    socket.on('leave', () => {
+      game.rooms.forEach(room => utils.arrayRemove(room.player_sockets, socket));
+      socket.emit("log", "Leave room");
+    })
+
+    console.log('User '+this.id+' connected')
+  }
+}
 
 
 new Game(io);
