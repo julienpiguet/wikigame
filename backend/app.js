@@ -90,10 +90,12 @@ class Game {
       console.log('Create room: ' + id);
       var room = new Room(id);
       room.addPlayer(player);
+      room.leader = player;
       rooms.push(room);
       resolve(room);
     });
   }
+  
   joinRoom(player, roomId){
     var rooms = this.rooms
     return new Promise( function (resolve, reject){
@@ -121,6 +123,8 @@ class Room {
     this.id = id;
     this.leader = null
     this.scoreboard = []
+    this.options = new Option();
+    this.onGame = false;
   }
   addPlayer(player) {
     this.players.push(player);
@@ -137,6 +141,63 @@ class Room {
         player.socket.emit(type, msg);
     });
   }
+
+  sendGameMsg(type, msg){
+    this.players.forEach( (player) => {
+      if (player.inGame)
+        player.socket.emit(type, msg);
+    });
+  }
+
+  startRound(){
+    this.onGame = true;
+    this.players.forEach( (player) => player.inGame = true);
+    
+    
+
+    this.runRound();
+    
+
+    /*setTimeout(() => {
+      clearInterval(roundInterval);
+      console.log('Room '+ this.id + ' round over ');
+      this.sendGameMsg('log', 'Round over');
+    }, this.options.roundTime*1000);*/
+
+  }
+
+  runRound(){
+    var timeCounter = this.options.roundTime.valueOf();
+    this.sendGameMsg('log', 'Start round');
+
+    var roundInterval = setInterval(() => {
+      //console.log('Room '+ this.id + ' remains '+ (this.timeCounter).toString() + ' sec of game');
+      this.sendGameMsg('timer', timeCounter);
+      
+      if (timeCounter <= 0) {
+        clearInterval(roundInterval);
+        this.sendGameMsg('log', 'Round Over');
+        this.runVote()
+      }
+      timeCounter--;
+    }, 1000);
+  }
+
+  runVote(){
+    var timeCounter = this.options.voteTime.valueOf();
+    this.sendGameMsg('log', 'Start votes');
+
+    var voteInterval = setInterval(() => {
+      //console.log('Room '+ this.id + ' remains '+ (this.timeCounter).toString() + ' sec of vote');
+      this.sendGameMsg('timer', timeCounter);
+      
+      if (timeCounter <= 0) {
+        clearInterval(voteInterval);
+        this.sendGameMsg('log', 'Votes Over');
+      }
+      timeCounter--;
+    }, 1000);
+  }
 }
 
 class Player {
@@ -144,6 +205,7 @@ class Player {
     this.id = uuidv4();
     this.socket = socket;
     this.room = null;
+    this.inGame = false;
 
     socket.on('create', () => {
       if (this.room){
@@ -179,10 +241,24 @@ class Player {
       
     })
 
+    socket.on('start', () => {
+      if (this.room && this.room.leader==this)
+        this.room.startRound();
+      else
+        this.socket.emit('err', 'Cannot start the round')
+    })
+
     console.log('User '+this.id+' connected')
   }
 }
 
+
+class Option {
+  constructor(){
+    this.roundTime = 20;
+    this.voteTime= 10;
+  }
+}
 
 new Game(io);
 
