@@ -62,7 +62,7 @@
 
     socket.on('err', function (msg) {
         var item = document.createElement('li');
-        item.textContent = msg;
+        item.textContent = msg.message;
         item.style.color = "red"
         log.appendChild(item);
     });

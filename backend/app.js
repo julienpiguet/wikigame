@@ -1,3 +1,4 @@
+
 const express = require('express');
 const app = express();
 const http = require('http');
@@ -12,6 +13,9 @@ const { v4: uuidv4 } = require('uuid')
 const wiki = require('./wiki.js')
 const utils = require('./utils.js');
 const { Interface } = require('readline');
+const GameError = require('./error.js');
+
+require('./error.js');
 
 const hostname = 'localhost';
 const port = 3000;
@@ -95,7 +99,7 @@ class Game {
       resolve(room);
     });
   }
-  
+
   joinRoom(player, roomId){
     var rooms = this.rooms
     return new Promise( function (resolve, reject){
@@ -106,7 +110,7 @@ class Game {
               room.addPlayer(player)
               resolve(room)
             } else {
-              reject("Already in room")
+              reject(new GameError(10).export())
             }
             added = true;
           }
@@ -209,7 +213,7 @@ class Player {
 
     socket.on('create', () => {
       if (this.room){
-        this.socket.emit('err', 'Already in room')
+        this.socket.emit('err', new GameError(10).export())
         return
       }
       game.createRoom(this).then(
@@ -236,16 +240,18 @@ class Player {
         this.room = null;
         socket.emit("log", "Room left");
       } else {
-        socket.emit("err", "No current room");
+        socket.emit("err", new GameError(11).export());
       }
       
     })
 
     socket.on('start', () => {
-      if (this.room && this.room.leader==this)
-        this.room.startRound();
-      else
-        this.socket.emit('err', 'Cannot start the round')
+      if (this.room) {
+        if (this.room.leader==this)
+          this.room.startRound();
+        else this.socket.emit('err', new GameError(13).export())
+      } else
+        this.socket.emit('err', new GameError(12).export())
     })
 
     console.log('User '+this.id+' connected')
