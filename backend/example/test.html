@@ -56,19 +56,13 @@
     var log = document.getElementById('log');
     socket.on('log', function (msg) {
         var item = document.createElement('li');
-        item.textContent = msg;
-        log.appendChild(item);
-    });
-
-    socket.on('err', function (msg) {
-        var item = document.createElement('li');
-        item.textContent = msg.message;
-        item.style.color = "red"
+        item.textContent = msg.message + (msg.data!=null?' '+msg.data:'');
+        if (msg.id >= 300) item.style.color = "red"
         log.appendChild(item);
     });
 
     socket.on('timer', (time) => {
-        timer.textContent = time;
+        timer.textContent = time.data;
     })
 </script>
 

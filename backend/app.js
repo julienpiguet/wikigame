@@ -13,9 +13,9 @@ const { v4: uuidv4 } = require('uuid')
 const wiki = require('./wiki.js')
 const utils = require('./utils.js');
 const { Interface } = require('readline');
-const GameError = require('./error.js');
+const {emitLog} = require('./log.js');
 
-require('./error.js');
+require('./log.js');
 
 const hostname = 'localhost';
 const port = 3000;
@@ -110,12 +110,12 @@ class Game {
               room.addPlayer(player)
               resolve(room)
             } else {
-              reject(new GameError(10).export())
+              reject(300)
             }
             added = true;
           }
         })
-        if (!added) reject("Room not found"); 
+        if (!added) reject(304); 
     });
     
   }
@@ -135,21 +135,28 @@ class Room {
   }
   removePlayer(player) {
     utils.arrayRemove(this.players, player);
+    this.sendLog(208, player.id)
   }
   contains(player){
     return this.players.includes(player);
   }
-  sendMsg(type,msg, exclude = []) {
+  sendLog(id, data = null, exclude = [], type = null) {
     this.players.forEach( (player) => {
       if (!exclude.includes(player))
-        player.socket.emit(type, msg);
+        if (type != null)
+          emitLog(player.socket, id, data, type)
+        else 
+          emitLog(player.socket, id, data)
     });
   }
 
-  sendGameMsg(type, msg){
+  sendGameLog(id, data = null, type = null){
     this.players.forEach( (player) => {
       if (player.inGame)
-        player.socket.emit(type, msg);
+        if (type != null)
+          emitLog(player.socket, id, data, type)
+        else 
+          emitLog(player.socket, id, data)
     });
   }
 
@@ -157,30 +164,21 @@ class Room {
     this.onGame = true;
     this.players.forEach( (player) => player.inGame = true);
     
-    
-
     this.runRound();
-    
-
-    /*setTimeout(() => {
-      clearInterval(roundInterval);
-      console.log('Room '+ this.id + ' round over ');
-      this.sendGameMsg('log', 'Round over');
-    }, this.options.roundTime*1000);*/
 
   }
 
   runRound(){
     var timeCounter = this.options.roundTime.valueOf();
-    this.sendGameMsg('log', 'Start round');
+    this.sendGameLog(203);
 
     var roundInterval = setInterval(() => {
       //console.log('Room '+ this.id + ' remains '+ (this.timeCounter).toString() + ' sec of game');
-      this.sendGameMsg('timer', timeCounter);
+      this.sendGameLog(100, timeCounter, 'timer');
       
       if (timeCounter <= 0) {
         clearInterval(roundInterval);
-        this.sendGameMsg('log', 'Round Over');
+        this.sendGameLog(204);
         this.runVote()
       }
       timeCounter--;
@@ -189,15 +187,15 @@ class Room {
 
   runVote(){
     var timeCounter = this.options.voteTime.valueOf();
-    this.sendGameMsg('log', 'Start votes');
+    this.sendGameLog(205);
 
     var voteInterval = setInterval(() => {
       //console.log('Room '+ this.id + ' remains '+ (this.timeCounter).toString() + ' sec of vote');
-      this.sendGameMsg('timer', timeCounter);
+      this.sendGameLog(100, timeCounter, 'timer');
       
       if (timeCounter <= 0) {
         clearInterval(voteInterval);
-        this.sendGameMsg('log', 'Votes Over');
+        this.sendGameLog(206);
       }
       timeCounter--;
     }, 1000);
@@ -213,24 +211,24 @@ class Player {
 
     socket.on('create', () => {
       if (this.room){
-        this.socket.emit('err', new GameError(10).export())
+        emitLog(this.socket, 300)
         return
       }
       game.createRoom(this).then(
         (room) => {
           this.room = room;
-          room.sendMsg("log", 'Room created with id: '+ room.id);
+          room.sendLog(200, room.id);
         },
-        (err) => socket.emit('err', err))
+        (err) => emitLog(socket, err))
     });
     socket.on('join', (id) => {
       game.joinRoom(this,id).then(
         (room) => {
           this.room = room;
-          room.sendMsg("log", this.id + ' joined the room', [this]);
-          this.socket.emit('log', 'Room joined')
+          room.sendLog(207, this.id, [this]);
+          emitLog(this.socket, 201)
         },
-        (err) => socket.emit('err', err)
+        (err) => emitLog(socket, err)
       )
     });
 
@@ -238,9 +236,9 @@ class Player {
       if (this.room) {
         this.room.removePlayer(this);
         this.room = null;
-        socket.emit("log", "Room left");
+        emitLog(socket, 202)
       } else {
-        socket.emit("err", new GameError(11).export());
+        emitLog(socket, 301)
       }
       
     })
@@ -249,9 +247,9 @@ class Player {
       if (this.room) {
         if (this.room.leader==this)
           this.room.startRound();
-        else this.socket.emit('err', new GameError(13).export())
+        else emitLog(this.socket, 303)
       } else
-        this.socket.emit('err', new GameError(12).export())
+      emitLog(this.socket, 302)
     })
 
     console.log('User '+this.id+' connected')
