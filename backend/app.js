@@ -15,8 +15,6 @@ const utils = require('./utils.js');
 const { Interface } = require('readline');
 const {emitLog} = require('./log.js');
 
-require('./log.js');
-
 const hostname = 'localhost';
 const port = 3000;
 
@@ -134,15 +132,14 @@ class Room {
     this.players.push(player);
   }
   removePlayer(player) {
-    utils.arrayRemove(this.players, player);
-    this.sendLog(208, player.id)
+    this.players = utils.arrayObjRemove(this.players, player.id);
   }
   contains(player){
     return this.players.includes(player);
   }
-  sendLog(id, data = null, exclude = [], type = null) {
+  sendLog(id, data = null, exclude = [], type = null, inGame = false) {
     this.players.forEach( (player) => {
-      if (!exclude.includes(player))
+      if (!exclude.includes(player) && ((player.inGame == inGame) || !inGame ))
         if (type != null)
           emitLog(player.socket, id, data, type)
         else 
@@ -151,13 +148,7 @@ class Room {
   }
 
   sendGameLog(id, data = null, type = null){
-    this.players.forEach( (player) => {
-      if (player.inGame)
-        if (type != null)
-          emitLog(player.socket, id, data, type)
-        else 
-          emitLog(player.socket, id, data)
-    });
+    this.sendLog(id, data, [], type, true)
   }
 
   startRound(){
@@ -234,8 +225,10 @@ class Player {
 
     socket.on('leave', () => {
       if (this.room) {
+        var currentRoom = this.room;
         this.room.removePlayer(this);
         this.room = null;
+        currentRoom.sendLog(208, this.id, [this])
         emitLog(socket, 202)
       } else {
         emitLog(socket, 301)

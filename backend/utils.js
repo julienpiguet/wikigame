@@ -14,5 +14,11 @@ module.exports = {
     return arr.filter(function (ele) {
       return ele != value;
     });
+  },
+
+  arrayObjRemove: function (arr, id) {
+    return arr.filter(function (ele) {
+      return ele.id != id;
+    });
   }
 }
