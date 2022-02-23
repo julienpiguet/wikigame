@@ -13,6 +13,7 @@ var logList = []
  logList[100] = 'timer'
  logList[101] = 'page'
  logList[102] = 'votes'
+ logList[103] = 'scoreboard'
 
 
  /**

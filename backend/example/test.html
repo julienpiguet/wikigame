@@ -23,6 +23,7 @@
     </form>
     <ul id="log"></ul>
     <ul id="votes"></ul>
+    <ul id="scoreboard"></ul>
     <span id="timer"></span>
 </body>
 <script src="/socket.io/socket.io.js"></script>
@@ -37,6 +38,7 @@
     var join = document.getElementById('join');
     var vote = document.getElementById('vote');
     var votes = document.getElementById('votes');
+    var scoreboard = document.getElementById('scoreboard');
     var inputJoin = document.getElementById('inputJoin');
     var inputVote = document.getElementById('inputVote');
 
@@ -85,6 +87,18 @@
             var item = document.createElement('li');
             item.textContent = element.id + ' ' + element.name + ' ' + element.vote;
             votes.appendChild(item);
+        });
+
+    });
+
+    socket.on('scoreboard', function (msg) {
+        scoreboard.innerHTML = "";
+        /* str = JSON.stringify(msg);
+        console.log(str); */
+        msg.data.forEach(element => {
+            var item = document.createElement('li');
+            item.textContent = element.id + ' ' + element.name + ' ' + element.score;
+            scoreboard.appendChild(item);
         });
 
     });

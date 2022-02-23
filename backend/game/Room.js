@@ -17,6 +17,7 @@ class Room {
     }
     addPlayer(player) {
         this.players.push(player);
+        this.scoreboard.set(player.id, 0);
     }
     removePlayer(player) {
         this.players = utils.arrayObjRemove(this.players, player.id);
@@ -101,6 +102,8 @@ class Room {
 
                 if (timeCounter <= 0) {
                     clearInterval(voteInterval);
+                    this.updateScore();
+                    this.sendLog(103, this.getScoreboard(), [], "scoreboard")
                     this.votes = null;
                     this.sendGameLog(206);
                     resolve();
@@ -146,6 +149,20 @@ class Room {
     }
 
     updateScore() {
+        var votesBoard = this.getVotes();
+        var max = 0;
+        var playercount = 0;
+        votesBoard.forEach((value)=>{
+            if (value.vote > max) {max = value.vote; playercount = 1}
+            else if (value.vote == max) playercount++;
+        })
+
+        if (max == 0 || playercount == 0) return
+        votesBoard.forEach((value)=>{
+            if (value.vote == max) {
+                this.scoreboard.set(value.id, this.scoreboard.get(value.id) + (playercount>1?this.options.pointsEqual:this.options.pointsPerWin));
+            }
+        })
 
     }
 
