@@ -11,6 +11,8 @@ var logList = []
  */
 
  logList[100] = 'timer'
+ logList[101] = 'page'
+ logList[102] = 'votes'
 
 
  /**
@@ -26,6 +28,8 @@ logList[205] = 'Votes start'
 logList[206] = 'Votes over'
 logList[207] = 'Room joined by'
 logList[208] = 'Room left by'
+logList[209] = 'Draw page'
+logList[210] = 'Vote changed'
 
 
 
@@ -38,6 +42,11 @@ logList[302] = 'Room does not exist'
 logList[303] = 'Access denied on room'
 logList[304] = 'Room not found'
 logList[305] = 'Cannot create a room'
+logList[306] = 'Room already started'
+logList[307] = 'Get wiki error'
+logList[308] = 'Not on voting phase'
+logList[309] = 'Cannot vote'
+logList[310] = 'Player not found'
 
 /**
  * Game Unexpected Error 4xx

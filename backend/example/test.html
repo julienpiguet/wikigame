@@ -16,9 +16,13 @@
         <button>Start</button>
     </form>
     <form id="join" action="">
-        <input id="input" autocomplete="off" /><button>Join</button>
+        <input id="inputJoin" autocomplete="off" /><button>Join</button>
+    </form>
+    <form id="vote" action="">
+        <input id="inputVote" autocomplete="off" /><button>Vote</button>
     </form>
     <ul id="log"></ul>
+    <ul id="votes"></ul>
     <span id="timer"></span>
 </body>
 <script src="/socket.io/socket.io.js"></script>
@@ -31,13 +35,16 @@
     var start = document.getElementById('start');
     var timer = document.getElementById('timer');
     var join = document.getElementById('join');
-    var input = document.getElementById('input');
+    var vote = document.getElementById('vote');
+    var votes = document.getElementById('votes');
+    var inputJoin = document.getElementById('inputJoin');
+    var inputVote = document.getElementById('inputVote');
 
     join.addEventListener('submit', function (e) {
         e.preventDefault();
-        if (input.value) {
-            socket.emit('join', input.value);
-            input.value = '';
+        if (inputJoin.value) {
+            socket.emit('join', inputJoin.value);
+            inputJoin.value = '';
         }
     });
     create.addEventListener('submit', function (e) {
@@ -52,11 +59,16 @@
         e.preventDefault();
         socket.emit('leave');
     });
+    vote.addEventListener('submit', function (e) {
+        e.preventDefault();
+        socket.emit('vote', inputVote.value);
+        inputVote.value = '';
+    });
 
     var log = document.getElementById('log');
     socket.on('log', function (msg) {
         var item = document.createElement('li');
-        item.textContent = msg.message + (msg.data!=null?' '+msg.data:'');
+        item.textContent = msg.message + (msg.data != null ? ' ' + msg.data : '');
         if (msg.id >= 300) item.style.color = "red"
         log.appendChild(item);
     });
@@ -64,6 +76,18 @@
     socket.on('timer', (time) => {
         timer.textContent = time.data;
     })
+
+    socket.on('votes', function (msg) {
+        votes.innerHTML = "";
+        /* str = JSON.stringify(msg);
+        console.log(str); */
+        msg.data.forEach(element => {
+            var item = document.createElement('li');
+            item.textContent = element.id + ' ' + element.name + ' ' + element.vote;
+            votes.appendChild(item);
+        });
+
+    });
 </script>
 
 </html>

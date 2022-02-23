@@ -1,4 +1,4 @@
-const {emitLog} = require('./log.js');
+const { emitLog } = require('./log.js');
 const { v4: uuidv4 } = require('uuid')
 
 class Player {
@@ -7,6 +7,7 @@ class Player {
         this.socket = socket;
         this.room = null;
         this.inGame = false;
+        this.lang = "fr";
 
         socket.on('create', () => {
             if (this.room) {
@@ -49,6 +50,16 @@ class Player {
                 if (this.room.leader == this)
                     this.room.startRound();
                 else emitLog(this.socket, 303)
+            } else
+                emitLog(this.socket, 302)
+        })
+
+        socket.on('vote', (id) => {
+            if (this.room) {
+                this.room.playerVote(this.id, id).then(
+                    (msg) => emitLog(this.socket, msg),
+                    (err) => emitLog(this.socket, err)
+                )
             } else
                 emitLog(this.socket, 302)
         })
