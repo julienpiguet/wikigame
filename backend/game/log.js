@@ -14,6 +14,8 @@ var logList = []
  logList[101] = 'page'
  logList[102] = 'votes'
  logList[103] = 'scoreboard'
+ logList[104] = 'start'
+ logList[105] = 'stop'
 
 
  /**
@@ -31,6 +33,8 @@ logList[207] = 'Room joined by'
 logList[208] = 'Room left by'
 logList[209] = 'Draw page'
 logList[210] = 'Vote changed'
+logList[211] = 'Lang changed to'
+logList[212] = 'Name set to'
 
 
 
@@ -48,6 +52,9 @@ logList[307] = 'Get wiki error'
 logList[308] = 'Not on voting phase'
 logList[309] = 'Cannot vote'
 logList[310] = 'Player not found'
+logList[311] = 'Not a valid lang'
+logList[312] = 'String is too long'
+logList[313] = 'String contains special char'
 
 /**
  * Game Unexpected Error 4xx

@@ -3,28 +3,45 @@
 
 <head>
     <title>Wikigame</title>
+    <script src="https://cdn.jsdelivr.net/npm/spainter@1.2.10/index.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/spainter@1.2.10/index.css" />
 </head>
 
 <body>
-    <form id="create" action="">
-        <button>Create</button>
-    </form>
-    <form id="leave" action="">
-        <button>Leave</button>
-    </form>
-    <form id="start" action="">
-        <button>Start</button>
-    </form>
-    <form id="join" action="">
-        <input id="inputJoin" autocomplete="off" /><button>Join</button>
-    </form>
-    <form id="vote" action="">
-        <input id="inputVote" autocomplete="off" /><button>Vote</button>
-    </form>
-    <ul id="log"></ul>
-    <ul id="votes"></ul>
-    <ul id="scoreboard"></ul>
-    <span id="timer"></span>
+    <div id="bar">
+        <form id="create" action="">
+            <button>Create</button>
+        </form>
+        <form id="leave" action="">
+            <button>Leave</button>
+        </form>
+        <form id="start" action="">
+            <button>Start</button>
+        </form>
+        <form id="join" action="">
+            <input id="inputJoin" autocomplete="off" /><button>Join</button>
+        </form>
+        <form id="vote" action="">
+            <input id="inputVote" autocomplete="off" /><button>Vote</button>
+        </form>
+        <form id="setlang" action="">
+            <input id="inputSetlang" autocomplete="off" /><button>Set Lang</button>
+        </form>
+        <form id="setname" action="">
+            <input id="inputSetname" autocomplete="off" /><button>Set Name</button>
+        </form>
+    </div>
+    <div id="main" style="display: flex;">
+        <div id="paint-div" style="flex: 0 1 70%">
+            <div id="containerPainter"></div>
+        </div>
+        <div id="left-side" style="flex: 0 1 auto">
+            <span id="timer"></span>
+            <ul id="log"></ul>
+            <ul id="votes"></ul>
+            <ul id="scoreboard"></ul>
+        </div>
+    </div>
 </body>
 <script src="/socket.io/socket.io.js"></script>
 <script>
@@ -41,6 +58,12 @@
     var scoreboard = document.getElementById('scoreboard');
     var inputJoin = document.getElementById('inputJoin');
     var inputVote = document.getElementById('inputVote');
+    var containerPainter = document.getElementById('containerPainter');
+    var setlang = document.getElementById('setlang');
+    var setname = document.getElementById('setname');
+    var inputSetlang = document.getElementById('inputSetlang');
+    var inputSetname = document.getElementById('inputSetname');
+
 
     join.addEventListener('submit', function (e) {
         e.preventDefault();
@@ -65,6 +88,18 @@
         e.preventDefault();
         socket.emit('vote', inputVote.value);
         inputVote.value = '';
+    });
+
+    setlang.addEventListener('submit', function (e) {
+        e.preventDefault();
+        socket.emit('setlang', inputSetlang.value);
+        inputSetlang.value = '';
+    });
+
+    setname.addEventListener('submit', function (e) {
+        e.preventDefault();
+        socket.emit('setname', inputSetname.value);
+        inputSetname.value = '';
     });
 
     var log = document.getElementById('log');
@@ -100,8 +135,20 @@
             item.textContent = element.id + ' ' + element.name + ' ' + element.score;
             scoreboard.appendChild(item);
         });
-
     });
+
+    socket.on('start', function (msg) {
+        paint = new Painter(containerPainter, {
+            onBlobPaste: function(blob) { 
+                socket.emit('image', blob);
+                console.log('Send image');
+                
+            }
+        });
+    });
+
+
+
 </script>
 
 </html>

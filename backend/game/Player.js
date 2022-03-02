@@ -1,5 +1,6 @@
 const { emitLog } = require('./log.js');
 const { v4: uuidv4 } = require('uuid')
+const { isValidLang, getLang } = require('./lang.js');
 
 class Player {
     constructor(game, socket) {
@@ -8,6 +9,7 @@ class Player {
         this.room = null;
         this.inGame = false;
         this.lang = "fr";
+        this.name = "Guest " + this.id.substring(0,4)
 
         socket.on('create', () => {
             if (this.room) {
@@ -62,6 +64,36 @@ class Player {
                 )
             } else
                 emitLog(this.socket, 302)
+        })
+
+        socket.on('image', (img) => {
+            console.log("image receive");
+        })
+
+        socket.on('setname', (name) => {
+            name = name.toString();
+            var format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+            if(format.test(name)){
+                emitLog(socket, 313);
+                return;
+            }
+
+            if (name.length>32){
+                emitLog(socket, 312);
+                return;
+            }
+
+            this.name = name;
+            emitLog(socket, 212, name);
+        })
+
+        socket.on('setlang', (lang) => {
+            if (isValidLang(lang)){
+                this.lang = lang;
+                emitLog(socket, 211, getLang(lang));
+            } else {
+                emitLog(socket, 311);
+            }
         })
 
         console.log('User ' + this.id + ' connected')

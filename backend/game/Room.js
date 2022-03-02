@@ -77,6 +77,7 @@ class Room {
             var timeCounter = this.options.roundTime.valueOf();
 
             this.sendGameLog(203);
+            this.sendGameLog(104, null, 'start');
             var roundInterval = setInterval(() => {
                 this.sendGameLog(100, timeCounter, 'timer');
 
@@ -171,7 +172,7 @@ class Room {
 
         this.players.forEach((player) => {
             if (player.inGame)
-                votesBoard.push({ id: player.id, name: "Guest", vote: 0 })
+                votesBoard.push({ id: player.id, name: player.name , vote: 0 })
         })
 
         this.votes.forEach((value, key) => {
@@ -188,7 +189,7 @@ class Room {
         var scoreboard = [];
 
         this.players.forEach((player) => {
-            scoreboard.push({ id: player.id, name: "Guest", score: this.scoreboard.get(player.id) })
+            scoreboard.push({ id: player.id, name: player.name, score: this.scoreboard.get(player.id) })
         })
 
         return scoreboard;
