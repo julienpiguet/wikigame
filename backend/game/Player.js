@@ -9,7 +9,7 @@ class Player {
         this.room = null;
         this.inGame = false;
         this.lang = "fr";
-        this.name = "Guest " + this.id.substring(0,4)
+        this.name = "Guest " + this.id.substring(0,4);
 
         socket.on('create', () => {
             if (this.room) {
@@ -67,7 +67,10 @@ class Player {
         })
 
         socket.on('image', (img) => {
-            console.log("image receive");
+            this.room.addImage(this, img).then(
+                (msg) => emitLog(this.socket, msg),
+                (err) => emitLog(this.socket, err)
+            )
         })
 
         socket.on('setname', (name) => {

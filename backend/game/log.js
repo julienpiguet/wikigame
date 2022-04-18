@@ -35,7 +35,9 @@ logList[209] = 'Draw page'
 logList[210] = 'Vote changed'
 logList[211] = 'Lang changed to'
 logList[212] = 'Name set to'
-
+logList[213] = 'Image uploaded'
+logList[214] = 'Wait all images'
+logList[215] = 'All images receive'
 
 
 /**
@@ -55,6 +57,8 @@ logList[310] = 'Player not found'
 logList[311] = 'Not a valid lang'
 logList[312] = 'String is too long'
 logList[313] = 'String contains special char'
+logList[314] = 'No image provided'
+logList[315] = 'Game not started'
 
 /**
  * Game Unexpected Error 4xx

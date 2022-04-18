@@ -13,6 +13,7 @@ class Room {
         this.options = new Option();
         this.onGame = false;
         this.pages = null;
+        this.images = null;
 
     }
     addPlayer(player) {
@@ -42,6 +43,7 @@ class Room {
         this.sendLog(id, data, [], type, true)
     }
 
+
     startRound() {
         if (this.onGame) {
             emitLog(this.leader.socket, 306);
@@ -51,23 +53,35 @@ class Room {
         this.onGame = true;
         this.players.forEach((player) => player.inGame = true);
         this.pages = new Map();
+        this.images = new Map();
 
 
-        var promises = [];
+        var getPagePromises = [];
         this.players.forEach((player) => {
             if (player.inGame)
-                promises.push(this.sendWikiPage(player))
+                getPagePromises.push(this.sendWikiPage(player))
         });
 
-        Promise.all(promises).then(() => {
+        Promise.all(getPagePromises).then(() => {
             this.runRound().then(
-                () => this.runVote().then(
-                    () => {
-                        this.onGame = false;
-                        this.players.forEach((player) => player.inGame = false);
-                        this.pages = null;
-                    }
-                )
+                () => {
+                    var getImagePromises = [];
+                    this.players.forEach((player) => {
+                        if (player.inGame)
+                            getImagePromises.push(this.collectImage(player));
+                    });
+                    this.sendGameLog(214);
+                    Promise.all(getImagePromises).then(() => {
+                        this.sendGameLog(215);
+                        this.runVote().then(() => {
+                                this.onGame = false;
+                                this.players.forEach((player) => player.inGame = false);
+                                this.pages = null;
+                                this.images = null;
+                            }
+                        )
+                    });
+                }
             )
         })
     }
@@ -125,6 +139,24 @@ class Room {
                     emitLog(player.socket, 307);
                     reject()
                 })
+        });
+    }
+
+    collectImage(player) {
+        return new Promise((resolve, reject) => {
+            var timeleft = this.options.imageUploadTime.valueOf();
+            var collectInterval = setInterval(() => {
+                if (this.images.has(player.id)) {
+                    clearInterval(collectInterval);
+                    resolve();
+                }
+                if (timeleft<=0) {
+                    clearInterval(collectInterval);
+                    emitLog(player.socket, 314);
+                    resolve();
+                }
+                timeleft--;
+            }, 1000);
         });
     }
 
@@ -193,6 +225,14 @@ class Room {
         })
 
         return scoreboard;
+    }
+
+    addImage(player, image){
+        return new Promise((resolve, reject) => {
+            if (!this.onGame) reject(315);
+            this.images.set(player.id, image);
+            resolve(213);
+        });
     }
 }
 
