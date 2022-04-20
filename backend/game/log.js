@@ -16,6 +16,7 @@ var logList = []
  logList[103] = 'scoreboard'
  logList[104] = 'start'
  logList[105] = 'stop'
+ logList[106] = 'image'
 
 
  /**

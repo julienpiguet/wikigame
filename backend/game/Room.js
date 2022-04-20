@@ -54,7 +54,7 @@ class Room {
         this.players.forEach((player) => player.inGame = true);
         this.pages = new Map();
         this.images = new Map();
-
+        
 
         var getPagePromises = [];
         this.players.forEach((player) => {
@@ -98,6 +98,7 @@ class Room {
                 if (timeCounter <= 0) {
                     clearInterval(roundInterval);
                     this.sendGameLog(204);
+                    this.sendGameLog(105, null, 'stop');
                     resolve();
                 }
                 timeCounter--;
@@ -109,6 +110,7 @@ class Room {
         return new Promise((resolve, reject) => {
             var timeCounter = this.options.voteTime.valueOf();
             this.votes = new Map();
+            this.sendImages();
             this.sendGameLog(205);
             this.sendLog(102, this.getVotes(), [], "votes")
 
@@ -230,9 +232,16 @@ class Room {
     addImage(player, image){
         return new Promise((resolve, reject) => {
             if (!this.onGame) reject(315);
-            this.images.set(player.id, image);
+            this.images.set(player.id, {id: player.id, name: player.name, page: this.pages.get(player.id).title ,image: image});
             resolve(213);
         });
+    }
+
+    sendImages(){
+        this.images.forEach( (img, key) => {
+            this.sendGameLog(106, img, "image");
+        })
+        
     }
 }
 

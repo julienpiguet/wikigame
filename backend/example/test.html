@@ -120,7 +120,7 @@
         console.log(str); */
         msg.data.forEach(element => {
             var item = document.createElement('li');
-            item.textContent = element.id + ' ' + element.name + ' ' + element.vote;
+            item.textContent = /*element.id +*/ ' ' + element.name + ': ' + element.vote;
             votes.appendChild(item);
         });
 
@@ -132,21 +132,42 @@
         console.log(str); */
         msg.data.forEach(element => {
             var item = document.createElement('li');
-            item.textContent = element.id + ' ' + element.name + ' ' + element.score;
+            item.textContent = /*element.id +*/ ' ' + element.name + ': ' + element.score;
             scoreboard.appendChild(item);
         });
     });
 
     socket.on('start', function (msg) {
         paint = new Painter(containerPainter, {
-            onBlobPaste: function(blob) { 
-                socket.emit('image', blob);
-                console.log('Send image');
+            onBlobPaste: function(img) { 
+                console.log(img.type)
+                //socket.emit('image', img.toString('base64'));
+                var reader = new FileReader();
+                reader.readAsDataURL(img); 
+                reader.onloadend = function() {
+                    var base64data = reader.result;    
+                    socket.emit('image', base64data);
+                    console.log('Send image');            
+                    console.log(base64data);
+                }
+                
                 
             }
         });
+        containerPainter.style.display = "block"
     });
 
+    socket.on('stop', function (msg) {
+        containerPainter.style.display = "none"
+    });
+
+
+    socket.on('image', function (msg) {
+        var image = new Image();
+        console.log(JSON.stringify(msg.data));
+        image.src = msg.data.image;
+        document.body.appendChild(image);
+    });
 
 
 </script>
