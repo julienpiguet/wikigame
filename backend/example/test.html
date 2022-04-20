@@ -34,7 +34,9 @@
     <div id="main" style="display: flex;">
         <div id="paint-div" style="flex: 0 1 70%">
             <div id="containerPainter"></div>
+            <div id="containerShow" style="display: flex; flex-direction: row; align-content: flex-start;"></div>
         </div>
+
         <div id="left-side" style="flex: 0 1 auto">
             <span id="timer"></span>
             <ul id="log"></ul>
@@ -59,6 +61,7 @@
     var inputJoin = document.getElementById('inputJoin');
     var inputVote = document.getElementById('inputVote');
     var containerPainter = document.getElementById('containerPainter');
+    var containerShow = document.getElementById('containerShow');
     var setlang = document.getElementById('setlang');
     var setname = document.getElementById('setname');
     var inputSetlang = document.getElementById('inputSetlang');
@@ -116,8 +119,6 @@
 
     socket.on('votes', function (msg) {
         votes.innerHTML = "";
-        /* str = JSON.stringify(msg);
-        console.log(str); */
         msg.data.forEach(element => {
             var item = document.createElement('li');
             item.textContent = /*element.id +*/ ' ' + element.name + ': ' + element.vote;
@@ -128,8 +129,6 @@
 
     socket.on('scoreboard', function (msg) {
         scoreboard.innerHTML = "";
-        /* str = JSON.stringify(msg);
-        console.log(str); */
         msg.data.forEach(element => {
             var item = document.createElement('li');
             item.textContent = /*element.id +*/ ' ' + element.name + ': ' + element.score;
@@ -138,10 +137,10 @@
     });
 
     socket.on('start', function (msg) {
+        containerShow.innerHTML = '';
         paint = new Painter(containerPainter, {
             onBlobPaste: function(img) { 
                 console.log(img.type)
-                //socket.emit('image', img.toString('base64'));
                 var reader = new FileReader();
                 reader.readAsDataURL(img); 
                 reader.onloadend = function() {
@@ -166,7 +165,20 @@
         var image = new Image();
         console.log(JSON.stringify(msg.data));
         image.src = msg.data.image;
-        document.body.appendChild(image);
+
+        var newDiv = document.createElement("div");
+        var title = document.createTextNode( msg.data.name);
+        var btn = document.createElement("button");
+        btn.innerHTML = "Vote";
+        btn.onclick = (() => {socket.emit('vote', msg.data.id);})
+
+        newDiv.appendChild(title);
+        newDiv.appendChild(image);
+        newDiv.appendChild(btn);
+
+
+        containerShow.appendChild(newDiv);
+
     });
 
 
