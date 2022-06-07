@@ -1,21 +1,22 @@
 <template>
   <v-app>
-    <v-main>
-      <HelloWorld/>
-    </v-main>
+    <HeaderBar/>
+    <MainApp/>
     <FootBar/>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import MainApp from './components/MainApp.vue'
 import FootBar from './components/FootBar.vue'
+import HeaderBar from './components/HeaderBar.vue'
 
 export default {
   name: 'App',
 
   components: {
-    HelloWorld,
+    MainApp,
+    HeaderBar,
     FootBar
   },
 
