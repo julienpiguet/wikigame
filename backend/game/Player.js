@@ -12,7 +12,9 @@ class Player {
         this.name = "Guest " + this.id.substring(0,4);
 
         socket.on('create', () => {
+            console.log(this.id+ " create room");
             if (this.room) {
+                console.log("Already in room");
                 emitLog(this.socket, 300)
                 return
             }

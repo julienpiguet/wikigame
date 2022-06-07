@@ -1,13 +1,13 @@
-var States = []
+var states = []
 
-logList[0] = 'idle'
-logList[1] = 'init'
-logList[2] = 'getpage'
-logList[3] = 'drawing'
-logList[4] = 'waitdraw'
-logList[5] = 'voting'
-logList[6] = 'result'
-logList[7] = 'waitnewgame'
+states[0] = 'idle'
+states[1] = 'init'
+states[2] = 'getpage'
+states[3] = 'drawing'
+states[4] = 'waitdraw'
+states[5] = 'voting'
+states[6] = 'result'
+states[7] = 'waitnewgame'
 
 
 
@@ -15,7 +15,7 @@ logList[7] = 'waitnewgame'
 module.exports = {
 
     state: (id) => {
-        if (logList[id] == undefined) return "unknown"
-        return States[id]
+        if (states[id] == undefined) return "unknown"
+        return states[id]
     }
 }
