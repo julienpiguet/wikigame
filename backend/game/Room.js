@@ -2,6 +2,7 @@ const { emitLog } = require('./log.js');
 const { Option } = require('./Option.js');
 const utils = require('./utils.js');
 const wiki = require('./wiki.js')
+const { state } = require('./State.js')
 
 class Room {
     constructor(id) {
@@ -14,21 +15,30 @@ class Room {
         this.onGame = false;
         this.pages = null;
         this.images = null;
-
+        this.state = state(1);
     }
+
     addPlayer(player) {
         this.players.push(player);
         this.scoreboard.set(player.id, 0);
+        if (this.onGame)
+            this.updatePlayerState(player,7);
+        else
+            this.updatePlayerState(player,1);
     }
+
     removePlayer(player) {
         this.players = utils.arrayObjRemove(this.players, player.id);
         if (this.leader == player) {
             this.leader = this.players[0];
         }
+        this.updatePlayerState(player,0);
     }
+
     contains(player) {
         return this.players.includes(player);
     }
+
     sendLog(id, data = null, exclude = [], type = null, inGame = false) {
         this.players.forEach((player) => {
             if (!exclude.includes(player) && ((player.inGame == inGame) || !inGame))
@@ -43,6 +53,20 @@ class Room {
         this.sendLog(id, data, [], type, true)
     }
 
+    updatePlayerState(player, id){
+        emitLog(player.socket, 107, state(id), 'state');
+    }
+
+    updateState(id, inGame = true){
+        this.players.forEach((player) => {
+            if ((player.inGame == inGame) || !inGame)
+                if (type != null)
+                    updatePlayerState(player, id)
+                else
+                    updatePlayerState(player, id)
+        });
+    }
+
 
     startRound() {
         if (this.onGame) {
@@ -54,8 +78,10 @@ class Room {
         this.players.forEach((player) => player.inGame = true);
         this.pages = new Map();
         this.images = new Map();
-        
 
+        
+        updateState(2)
+        
         var getPagePromises = [];
         this.players.forEach((player) => {
             if (player.inGame)
@@ -65,6 +91,7 @@ class Room {
         Promise.all(getPagePromises).then(() => {
             this.runRound().then(
                 () => {
+                    
                     var getImagePromises = [];
                     this.players.forEach((player) => {
                         if (player.inGame)
@@ -89,7 +116,7 @@ class Room {
     runRound() {
         return new Promise((resolve, reject) => {
             var timeCounter = this.options.roundTime.valueOf();
-
+            updateState(3)
             this.sendGameLog(203);
             this.sendGameLog(104, null, 'start');
             var roundInterval = setInterval(() => {
@@ -97,6 +124,7 @@ class Room {
 
                 if (timeCounter <= 0) {
                     clearInterval(roundInterval);
+                    updateState(4)
                     this.sendGameLog(204);
                     this.sendGameLog(105, null, 'stop');
                     resolve();
@@ -111,6 +139,7 @@ class Room {
             var timeCounter = this.options.voteTime.valueOf();
             this.votes = new Map();
             this.sendImages();
+            updateState(5)
             this.sendGameLog(205);
             this.sendLog(102, this.getVotes(), [], "votes")
 
@@ -120,6 +149,7 @@ class Room {
                 if (timeCounter <= 0) {
                     clearInterval(voteInterval);
                     this.updateScore();
+                    updateState(5)
                     this.sendLog(103, this.getScoreboard(), [], "scoreboard")
                     this.votes = null;
                     this.sendGameLog(206);

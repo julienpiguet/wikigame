@@ -23,6 +23,7 @@ class Player {
                 },
                 (err) => emitLog(socket, err))
         });
+
         socket.on('join', (id) => {
             game.joinRoom(this, id).then(
                 (room) => {
@@ -45,7 +46,7 @@ class Player {
                 emitLog(socket, 301)
             }
 
-        })
+        });
 
         socket.on('start', () => {
             if (this.room) {
@@ -54,7 +55,7 @@ class Player {
                 else emitLog(this.socket, 303)
             } else
                 emitLog(this.socket, 302)
-        })
+        });
 
         socket.on('vote', (id) => {
             if (this.room) {
@@ -64,14 +65,17 @@ class Player {
                 )
             } else
                 emitLog(this.socket, 302)
-        })
+        });
 
         socket.on('image', (img) => {
-            this.room.addImage(this, img).then(
-                (msg) => emitLog(this.socket, msg),
-                (err) => emitLog(this.socket, err)
-            )
-        })
+            if (this.room) {
+                this.room.addImage(this, img).then(
+                    (msg) => emitLog(this.socket, msg),
+                    (err) => emitLog(this.socket, err)
+                )
+            } else
+                emitLog(this.socket, 302)
+        });
 
         socket.on('setname', (name) => {
             name = name.toString();
@@ -88,7 +92,7 @@ class Player {
 
             this.name = name;
             emitLog(socket, 212, name);
-        })
+        });
 
         socket.on('setlang', (lang) => {
             if (isValidLang(lang)){
@@ -97,9 +101,9 @@ class Player {
             } else {
                 emitLog(socket, 311);
             }
-        })
+        });
 
-        console.log('User ' + this.id + ' connected')
+        console.log('User ' + this.id + ' connected');
     }
 }
 

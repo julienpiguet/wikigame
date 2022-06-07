@@ -7,7 +7,7 @@ var logList = []
 
 
 /**
- * Game Status 1xx
+ * Game Action 1xx
  */
 
  logList[100] = 'timer'
@@ -17,6 +17,7 @@ var logList = []
  logList[104] = 'start'
  logList[105] = 'stop'
  logList[106] = 'image'
+ logList[107] = 'state'
 
 
  /**
