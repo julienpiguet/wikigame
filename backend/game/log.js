@@ -18,6 +18,9 @@ var logList = []
  logList[105] = 'stop'
  logList[106] = 'image'
  logList[107] = 'state'
+ logList[108] = 'username'
+ logList[109] = 'owner'
+ logList[110] = 'room'
 
 
  /**
@@ -40,6 +43,7 @@ logList[212] = 'Name set to'
 logList[213] = 'Image uploaded'
 logList[214] = 'Wait all images'
 logList[215] = 'All images receive'
+logList[216] = ' change name to '
 
 
 /**
@@ -68,20 +72,21 @@ logList[315] = 'Game not started'
 
 
 class GameLog {
-    constructor(id, data = null) {
+    constructor(id, data = null, prefix = '') {
         this.id = id;
         this.message = '';
         this.data = data;
 
         if (logList[id] == undefined) this.message = 'Unknown Error';
         else this.message = logList[id];
+        this.message = prefix + this.message
     }
     export() {return {id: this.id, message: this.message, data: this.data}}
 }
 
 module.exports = {
 
-    emitLog: (socket, id, data = null, tag = 'log') => {
-        socket.emit(tag, new GameLog(id, data).export())
+    emitLog: (socket, id, data = null, tag = 'log', prefix = '') => {
+        socket.emit(tag, new GameLog(id, data, prefix).export())
     }
 }

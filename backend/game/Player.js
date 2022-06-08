@@ -21,6 +21,7 @@ class Player {
             game.createRoom(this).then(
                 (room) => {
                     this.room = room;
+                    emitLog(this.socket, 109, true, "owner")
                     room.sendLog(200, room.id);
                 },
                 (err) => emitLog(socket, err))
@@ -30,7 +31,7 @@ class Player {
             game.joinRoom(this, id).then(
                 (room) => {
                     this.room = room;
-                    room.sendLog(207, this.id, [this]);
+                    room.sendLog(207, this.name, [this]);
                     emitLog(this.socket, 201)
                 },
                 (err) => emitLog(socket, err)
@@ -40,10 +41,17 @@ class Player {
         socket.on('leave', () => {
             if (this.room) {
                 var currentRoom = this.room;
-                this.room.removePlayer(this);
                 this.room = null;
-                currentRoom.sendLog(208, this.id, [this])
-                emitLog(socket, 202)
+                this.inGame = false;
+                currentRoom.removePlayer(this).then(
+                    () => {
+                        currentRoom.sendLog(208, this.name, [this])
+                        emitLog(socket, 202)
+                    },
+                    (err) => {
+                        console.log("Delete room: " + err)
+                    }
+                );
             } else {
                 emitLog(socket, 301)
             }
@@ -80,6 +88,7 @@ class Player {
         });
 
         socket.on('setname', (name) => {
+            var oldname = this.name;
             name = name.toString();
             var format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
             if(format.test(name)){
@@ -94,6 +103,10 @@ class Player {
 
             this.name = name;
             emitLog(socket, 212, name);
+            if (this.room) {
+                this.room.sendLogPrefix(216, name, [this], oldname)
+                this.room.sendScoreboard();
+            }
         });
 
         socket.on('setlang', (lang) => {
@@ -104,8 +117,13 @@ class Player {
                 emitLog(socket, 311);
             }
         });
-
-        console.log('User ' + this.id + ' connected');
+        
+        socket.on('getname', () => {
+            emitLog(this.socket, 108, this.name, "username");
+        })
+        
+        emitLog(this.socket, 108, this.name, "username");
+        console.log('User ' + this.name + ' connected');
     }
 }
 

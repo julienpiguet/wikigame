@@ -25,14 +25,23 @@ class Room {
             this.updatePlayerState(player,7);
         else
             this.updatePlayerState(player,1);
+        this.sendScoreboard();
+        emitLog(player.socket, 110, this.id, "room");
     }
 
     removePlayer(player) {
-        this.players = utils.arrayObjRemove(this.players, player.id);
-        if (this.leader == player) {
-            this.leader = this.players[0];
-        }
-        this.updatePlayerState(player,0);
+        return new Promise((resolve, reject) => {
+            this.players = utils.arrayObjRemove(this.players, player.id);
+            if (this.players.length==0) reject(this.id);
+            if (this.leader == player) {
+                this.leader = this.players[0];
+                emitLog(this.leader.socket, 109, true, "owner")
+            }
+            this.updatePlayerState(player,0);
+            this.scoreboard.delete(player.id)
+            this.sendScoreboard()
+            resolve();
+        })
     }
 
     contains(player) {
@@ -49,6 +58,13 @@ class Room {
         });
     }
 
+    sendLogPrefix(id, data = null, exclude = [], prefix = '') {
+        this.players.forEach((player) => {
+            if (!exclude.includes(player))
+                emitLog(player.socket, id, data, 'log', prefix)
+        });
+    }
+
     sendGameLog(id, data = null, type = null) {
         this.sendLog(id, data, [], type, true)
     }
@@ -60,10 +76,7 @@ class Room {
     updateState(id, inGame = true){
         this.players.forEach((player) => {
             if ((player.inGame == inGame) || !inGame)
-                if (type != null)
-                    updatePlayerState(player, id)
-                else
-                    updatePlayerState(player, id)
+                    this.updatePlayerState(player, id)
         });
     }
 
@@ -80,7 +93,7 @@ class Room {
         this.images = new Map();
 
         
-        updateState(2)
+        this.updateState(2)
         
         var getPagePromises = [];
         this.players.forEach((player) => {
@@ -116,7 +129,7 @@ class Room {
     runRound() {
         return new Promise((resolve, reject) => {
             var timeCounter = this.options.roundTime.valueOf();
-            updateState(3)
+            this.updateState(3)
             this.sendGameLog(203);
             this.sendGameLog(104, null, 'start');
             var roundInterval = setInterval(() => {
@@ -124,7 +137,7 @@ class Room {
 
                 if (timeCounter <= 0) {
                     clearInterval(roundInterval);
-                    updateState(4)
+                    this.updateState(4)
                     this.sendGameLog(204);
                     this.sendGameLog(105, null, 'stop');
                     resolve();
@@ -139,7 +152,7 @@ class Room {
             var timeCounter = this.options.voteTime.valueOf();
             this.votes = new Map();
             this.sendImages();
-            updateState(5)
+            this.updateState(5)
             this.sendGameLog(205);
             this.sendLog(102, this.getVotes(), [], "votes")
 
@@ -149,7 +162,7 @@ class Room {
                 if (timeCounter <= 0) {
                     clearInterval(voteInterval);
                     this.updateScore();
-                    updateState(5)
+                    this.updateState(6)
                     this.sendLog(103, this.getScoreboard(), [], "scoreboard")
                     this.votes = null;
                     this.sendGameLog(206);
@@ -165,6 +178,7 @@ class Room {
             wiki.getRandomWiki(player.lang).then((value) => {
                 this.pages.set(player.id, value);
                 emitLog(player.socket, 209, value.title);
+                emitLog(player.socket, 101, value, 'page');
                 resolve();
             },
                 (err) => {
@@ -253,7 +267,7 @@ class Room {
         var scoreboard = [];
 
         this.players.forEach((player) => {
-            scoreboard.push({ id: player.id, name: player.name, score: this.scoreboard.get(player.id) })
+            scoreboard.push({ id: player.id, name: player.name, score: this.scoreboard.get(player.id), isLeader:  this.leader==player})
         })
 
         return scoreboard;
@@ -271,7 +285,10 @@ class Room {
         this.images.forEach( (img, key) => {
             this.sendGameLog(106, img, "image");
         })
-        
+    }
+
+    sendScoreboard(){
+        this.sendLog(103, this.getScoreboard(), [], "scoreboard")
     }
 }
 

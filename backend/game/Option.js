@@ -1,7 +1,7 @@
 class Option {
     constructor() {
-        this.roundTime = 20;
-        this.voteTime = 10;
+        this.roundTime = 40;
+        this.voteTime = 20;
         this.imageUploadTime = 10;
         this.pointsPerWin = 3;
         this.pointsEqual = 1;

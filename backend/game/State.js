@@ -10,10 +10,7 @@ states[6] = 'result'
 states[7] = 'waitnewgame'
 
 
-
-
 module.exports = {
-
     state: (id) => {
         if (states[id] == undefined) return "unknown"
         return states[id]

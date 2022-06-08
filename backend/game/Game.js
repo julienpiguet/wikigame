@@ -24,8 +24,8 @@ class Game {
             var id = utils.generateId(10);
             console.log('Create room: ' + id);
             var room = new Room(id);
-            room.addPlayer(player);
             room.leader = player;
+            room.addPlayer(player);
             rooms.push(room);
             resolve(room);
         });
@@ -48,7 +48,6 @@ class Game {
             })
             if (!added) reject(304);
         });
-
     }
 }
 
