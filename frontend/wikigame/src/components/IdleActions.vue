@@ -1,6 +1,6 @@
 <template>
   <v-container style="max-width: 960px; margin-top: 20px;">
-    <v-card class="d-flex justify-center" color="primary">
+    <v-card class="d-flex justify-center" color="secondary">
       <v-container mt-4>
 
         <v-row>
