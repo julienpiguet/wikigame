@@ -7,24 +7,25 @@
             <div v-else>
                 <v-container>
                     <v-row>
-                        <v-col>
+                        <v-col class="fill-height">
                              <div v-if="getGameState === 'init'">
                                 <StartGame/>
                             </div>
                             <div v-else-if="getGameState === 'getpage'">
-                                getpage
+                                <WaitPage waitingText='Wait wiki page...'/>
                             </div>
                             <div v-else-if="getGameState === 'drawing'">
                                 <ShowPage/>
+                                <DrawingCanvas/>
                             </div>
                             <div v-else-if="getGameState === 'waitdraw'">
-                                waitdraw
+                                <WaitPage waitingText='Wait for everyone images...'/>
                             </div>
                             <div v-else-if="getGameState === 'voting'">
-                                voting
+                                <ShowImages/>
                             </div>
                             <div v-else-if="getGameState === 'result'">
-                                result
+                                <ShowResults/>
                             </div>
                             <div v-else-if="getGameState === 'waitnewgame'">
                                 waitnewgame
@@ -53,6 +54,10 @@ import ScoreBoard from './ScoreBoard.vue'
 import StartGame from './StartGame.vue'
 import RoomStatus from './RoomStatus.vue'
 import ShowPage from './ShowPage.vue'
+import WaitPage from './WaitPage.vue'
+import DrawingCanvas from './DrawingCanvas.vue'
+import ShowImages from './ShowImages.vue'
+import ShowResults from './ShowResults.vue'
 
 export default {
     name: 'MainApp',
@@ -63,12 +68,17 @@ export default {
         ScoreBoard,
         StartGame,
         RoomStatus,
-        ShowPage
+        ShowPage,
+        WaitPage,
+        DrawingCanvas,
+        ShowImages,
+        ShowResults
     },
 
     sockets: {
         state: function (msg) {
             this.$store.commit('SET_STATE', msg.data)
+            if (msg.data=="getpage") this.$store.commit('RESET_GAME_DATA');
         },
         log: function (msg) {
             this.$store.commit('ADD_LOG', {isError: (msg.id >= 300), msg: (msg.message + (msg.data != null ? ' ' + msg.data : ''))});
@@ -84,7 +94,20 @@ export default {
         },
         page: function (msg) {
             this.$store.commit("SET_PAGE", msg.data);
+        },
+        waitimage: function () {
+            this.$socket.emit('image', this.$store.state.image);
+        },
+        image: function (msg) {
+            this.$store.commit("ADD_IMAGE", msg.data);
+        },
+        timer: function (msg) {
+            this.$store.commit("SET_TIMER", msg.data);
+        },
+        username: function (msg) {
+            this.$store.commit("SET_USERNAME", msg.data);
         }
+
 
     },
 
