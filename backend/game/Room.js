@@ -190,6 +190,7 @@ class Room {
 
     collectImage(player) {
         return new Promise((resolve, reject) => {
+            emitLog(player.socket, 111, null, 'waitimage');
             var timeleft = this.options.imageUploadTime.valueOf();
             var collectInterval = setInterval(() => {
                 if (this.images.has(player.id)) {

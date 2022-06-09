@@ -21,6 +21,9 @@ var logList = []
  logList[108] = 'username'
  logList[109] = 'owner'
  logList[110] = 'room'
+ logList[111] = 'waitimage'
+
+
 
 
  /**

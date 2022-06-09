@@ -96,13 +96,14 @@ class Player {
                 return;
             }
 
-            if (name.length>32){
+            if (name.length>20){
                 emitLog(socket, 312);
                 return;
             }
 
             this.name = name;
             emitLog(socket, 212, name);
+            emitLog(this.socket, 108, this.name, "username");
             if (this.room) {
                 this.room.sendLogPrefix(216, name, [this], oldname)
                 this.room.sendScoreboard();

@@ -8,6 +8,8 @@ states[4] = 'waitdraw'
 states[5] = 'voting'
 states[6] = 'result'
 states[7] = 'waitnewgame'
+states[8] = 'gamedone'
+
 
 
 module.exports = {
