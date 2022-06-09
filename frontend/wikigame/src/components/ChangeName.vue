@@ -13,7 +13,7 @@
             </v-form>
         </div>
         <div v-else>
-            <v-form v-model="valid">
+            <v-form v-model="valid" @submit.prevent="modify">
                 <v-card class="d-flex justify-end align-center" flat tile  >
                     <v-card class="pa-auto"  flat tile >
                         <v-text-field class="pa-2 align-center" v-model="newUsername" :rules="usernameRules" label="Username"
@@ -42,6 +42,7 @@ export default {
         usernameRules: [
             v => !!v || 'Username is required',
             v => (v && v.length <= 15) || 'Username must be less than 15 characters',
+            v => !(/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]+/).test(v) || 'Username must not contains special characters',
         ],
     }),
 
@@ -55,8 +56,8 @@ export default {
             this.newUsername = this.$store.state.username
         },
         modify: function () {
+            if (!this.valid) return;
             this.editing = false;
-            this.$store.commit("SET_USERNAME",this.newUsername);
             this.$socket.emit('setname', this.newUsername);
         },
         cancel: function () {
@@ -70,13 +71,6 @@ export default {
         }
     },
 
-    sockets: {
-        username: function (msg) {
-            this.$store.commit("SET_USERNAME", msg.data);
-        }
-    },
-
-    
 }
 
 </script>

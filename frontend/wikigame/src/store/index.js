@@ -8,6 +8,10 @@ export default createStore({
     roomId: "",
     isOwner: false,
     page: null,
+    image: "",
+    timer: 0,
+    vote: "",
+    images: [],
     scoreboard: [],
     logs: []
   },
@@ -54,7 +58,25 @@ export default createStore({
     },
     SET_PAGE(state, page){
       state.page = page;
-    }
+    },
+    SET_IMAGE(state, image){
+      state.image = image;
+    },
+    ADD_IMAGE(state, image){
+      state.images.push(image);
+    },
+    SET_TIMER(state, timer){
+      state.timer = timer;
+    },
+    SET_VOTE(state, vote){
+      state.vote = vote;
+    },
+    RESET_GAME_DATA(state){
+      state.page = null;
+      state.image = "";
+      state.images = [];
+      state.vote = "";
+    },
   },
   actions: {
   },

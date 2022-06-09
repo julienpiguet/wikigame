@@ -2,7 +2,7 @@
     <v-card contained-text title="Scoreboard" class="mb-4">
         <v-table>
             <tbody>
-                <tr v-for="item in getScoreboard" :key="item.name">
+                <tr v-for="item in getScoreboard" :key="item.score">
                     <td><span v-if="item.isLeader" class="text-yellow">
                             <v-icon icon="mdi-crown" />
                         </span>{{ item.name }}</td>
@@ -18,7 +18,7 @@ export default {
     name: 'ScoreBoard',
     computed: {
         getScoreboard() {
-            return this.$store.state.scoreboard
+            return [...this.$store.state.scoreboard].sort((a, b) => b.score - a.score)
         }
     }
 }
