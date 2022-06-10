@@ -291,6 +291,10 @@ class Room {
     sendScoreboard(){
         this.sendLog(103, this.getScoreboard(), [], "scoreboard")
     }
+
+    sendChatMsg(msg, source){
+        this.sendLog(112, {id: source.id, name: source.name, message: msg}, [], "chatmsg")
+    }
 }
 
 module.exports.Room = Room;

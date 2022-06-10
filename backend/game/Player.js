@@ -122,6 +122,11 @@ class Player {
         socket.on('getname', () => {
             emitLog(this.socket, 108, this.name, "username");
         })
+
+        socket.on('chatmsg', (msg) => {
+            if (!this.room) emitLog(socket, 301)
+            this.room.sendChatMsg(msg, this);
+        })
         
         emitLog(this.socket, 108, this.name, "username");
         console.log('User ' + this.name + ' connected');

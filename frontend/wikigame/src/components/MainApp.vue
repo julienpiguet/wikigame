@@ -28,7 +28,7 @@
                                 <ShowResults/>
                             </div>
                             <div v-else-if="getGameState === 'waitnewgame'">
-                                waitnewgame
+                                <WaitNewGame/>
                             </div>
                             <div v-else>
                                 Unknow state
@@ -58,6 +58,7 @@ import WaitPage from './WaitPage.vue'
 import DrawingCanvas from './DrawingCanvas.vue'
 import ShowImages from './ShowImages.vue'
 import ShowResults from './ShowResults.vue'
+import WaitNewGame from './WaitNewGame.vue'
 
 export default {
     name: 'MainApp',
@@ -72,7 +73,8 @@ export default {
         WaitPage,
         DrawingCanvas,
         ShowImages,
-        ShowResults
+        ShowResults,
+        WaitNewGame
     },
 
     sockets: {
@@ -81,7 +83,13 @@ export default {
             if (msg.data=="getpage") this.$store.commit('RESET_GAME_DATA');
         },
         log: function (msg) {
-            this.$store.commit('ADD_LOG', {isError: (msg.id >= 300), msg: (msg.message + (msg.data != null ? ' ' + msg.data : ''))});
+            if (msg.id >= 300)
+                this.$store.commit('ADD_LOG', {type: 'error', data: { msg: (msg.message + (msg.data != null ? ' ' + msg.data : ''))}});
+            else
+                this.$store.commit('ADD_LOG', {type: 'log', data: { msg: (msg.message + (msg.data != null ? ' ' + msg.data : ''))}});
+        },
+        chatmsg: function (msg) {
+            this.$store.commit('ADD_LOG', {type: 'chat', data: msg.data});
         },
         scoreboard: function (msg) {
             this.$store.commit('SET_SCOREBOARD', msg.data);

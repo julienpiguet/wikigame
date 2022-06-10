@@ -10,13 +10,14 @@
 
       <v-row>
         <v-col class="d-flex justify-center">
-          <v-tooltip location="top">
-            <template v-slot:activator="{ props }">
+          <v-hover v-slot="{ isHovering, props }">
+            <v-card :elevation="isHovering ? 8 : 0" v-bind="props" class="px-2" @mouseleave="reset">
               <span v-bind="props" class="text-h6" @click="copyId">{{ getRoomId }}</span>
-            </template>
-            <span>{{ cliptext }}</span>
-          </v-tooltip>
-          
+              <v-tooltip location="top" activator="parent">
+                <span>{{ cliptext }}</span>
+              </v-tooltip>
+            </v-card>
+          </v-hover>
         </v-col>
       </v-row>
 
@@ -31,14 +32,14 @@
       <template v-if="getState == 'result' && isOwner">
         <v-row>
           <v-col class="d-flex justify-center">
-            <v-btn @click="restart" elevation="2" class="pa-2 ma-2">Restart</v-btn>
+            <v-btn @click="restart" elevation="2" class="pa-2 ma-2" color="success" plain>Restart</v-btn>
           </v-col>
         </v-row>
       </template>
 
       <v-row>
         <v-col class="d-flex justify-center">
-          <v-btn @click="leave" elevation="2" class="pa-2 ma-2">Leave</v-btn>
+          <v-btn @click="leave" elevation="2" class="pa-2 ma-2" color="error" plain>Leave</v-btn>
         </v-col>
       </v-row>
     </v-container>
@@ -52,7 +53,7 @@ export default {
     cliptext: "Copy to clipboard",
     clipdefault: "Copy to clipboard",
     clipcopy: "ID Copied!",
-    
+
   }),
   methods: {
     leave: function () {
@@ -62,10 +63,12 @@ export default {
     restart: function () {
       this.$socket.emit('start');
     },
-    copyId: function (){
+    copyId: function () {
       navigator.clipboard.writeText(this.$store.state.roomId);
       this.cliptext = this.clipcopy;
-      
+    },
+    reset: function(){
+      this.cliptext = this.clipdefault;
     }
   },
   computed: {
