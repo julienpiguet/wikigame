@@ -52,7 +52,9 @@ export default {
 
     computed: {
         getLogs() {
-            return this.$store.state.logs
+            if (this.$store.state.logs.length>6)
+                return [...this.$store.state.logs].slice(this.$store.state.logs.length - 7, this.$store.state.logs.length - 1)
+            else return this.$store.state.logs
         },
     },
 

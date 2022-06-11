@@ -13,7 +13,7 @@ class Game {
             this.players.push(new Player(this, socket));
         });
 
-        io.on('disconnect', (socket) => {
+        io.on('connect_error', (socket) => {
             console.log('Socket ' + socket.id + ' disconected');
         });
 
