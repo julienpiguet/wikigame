@@ -8,6 +8,7 @@ class Game {
         this.rooms = [];
         this.io = io;
         this.players = [];
+        this.delay = 1000;
 
         io.on('connection', (socket) => {
             this.players.push(new Player(this, socket));
@@ -19,7 +20,7 @@ class Game {
 
     }
     createRoom(player) {
-        var rooms = this.rooms
+        var rooms = this.rooms;
         return new Promise(function (resolve, reject) {
             var id = utils.generateId(10);
             console.log('Create room: ' + id);
@@ -32,7 +33,7 @@ class Game {
     }
 
     joinRoom(player, roomId) {
-        var rooms = this.rooms
+        var rooms = this.rooms;
         return new Promise(function (resolve, reject) {
             var added = false;
             rooms.forEach((room, index, array) => {
@@ -48,6 +49,20 @@ class Game {
             })
             if (!added) reject(304);
         });
+    }
+
+    run(){
+        return setInterval(this.runtime, this.delay, this);
+    }
+
+    runtime(game) {
+        var toDelete = []
+        game.rooms.forEach( room => {
+            if (room.deleted) toDelete.push(room);
+        });
+        toDelete.forEach(room => {
+            game.rooms = utils.arrayObjRemove(game.rooms, room);
+        })
     }
 }
 

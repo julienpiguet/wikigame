@@ -58,7 +58,8 @@ app.get('/join/:id', (req, res) => {
   }
 });
 
-new Game(io);
+const game = new Game(io);
+const runtime = game.run();
 
 
 /****************************************
