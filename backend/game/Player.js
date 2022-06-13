@@ -49,13 +49,12 @@ class Player {
                         emitLog(socket, 202)
                     },
                     (err) => {
-                        console.log("Delete room: " + err)
+                        console.log("Leave error: " + err)
                     }
                 );
             } else {
                 emitLog(socket, 301)
             }
-
         });
 
         socket.on('start', () => {
@@ -79,7 +78,7 @@ class Player {
 
         socket.on('image', (img) => {
             if (this.room) {
-                this.room.addImage(this, img).then(
+                this.room.playerAddImage(this, img).then(
                     (msg) => emitLog(this.socket, msg),
                     (err) => emitLog(this.socket, err)
                 )
@@ -126,6 +125,14 @@ class Player {
         socket.on('chatmsg', (msg) => {
             if (!this.room) emitLog(socket, 301)
             this.room.sendChatMsg(msg, this);
+        })
+
+        socket.on('pagechoice', (msg) => {
+            this.room.playerPage.set(this.id, msg)
+        })
+
+        socket.on('votepage', (msg) => {
+            this.room.pageVotes.set(this.id, msg)
         })
         
         emitLog(this.socket, 108, this.name, "username");

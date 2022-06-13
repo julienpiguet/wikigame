@@ -16,9 +16,9 @@ module.exports = {
     });
   },
 
-  arrayObjRemove: function (arr, id) {
+  arrayObjRemove: function (arr, obj) {
     return arr.filter(function (ele) {
-      return ele.id != id;
+      return ele.id != obj.id;
     });
   }
 }

@@ -11,11 +11,17 @@
                              <div v-if="getGameState === 'init'">
                                 <StartGame/>
                             </div>
-                            <div v-else-if="getGameState === 'getpage'">
+                            <div v-else-if="getGameState === 'getpages'">
                                 <WaitPage waitingText='Wait wiki page...'/>
                             </div>
+                            <div v-else-if="getGameState === 'choosepage'">
+                                <ChoicePage/>
+                            </div>
+                            <div v-else-if="getGameState === 'votepage'">
+                                <VotePage/>
+                            </div>
                             <div v-else-if="getGameState === 'drawing'">
-                                <ShowPage/>
+                                <ShowPage :page="getPage"/>
                                 <DrawingCanvas/>
                             </div>
                             <div v-else-if="getGameState === 'waitdraw'">
@@ -59,6 +65,8 @@ import DrawingCanvas from './DrawingCanvas.vue'
 import ShowImages from './ShowImages.vue'
 import ShowResults from './ShowResults.vue'
 import WaitNewGame from './WaitNewGame.vue'
+import ChoicePage from './ChoicePage.vue'
+import VotePage from './VotePage.vue'
 
 export default {
     name: 'MainApp',
@@ -74,7 +82,9 @@ export default {
         DrawingCanvas,
         ShowImages,
         ShowResults,
-        WaitNewGame
+        WaitNewGame,
+        ChoicePage,
+        VotePage
     },
 
     sockets: {
@@ -103,6 +113,12 @@ export default {
         page: function (msg) {
             this.$store.commit("SET_PAGE", msg.data);
         },
+        pagechoice: function (msg) {
+            this.$store.commit("ADD_CHOICE_PAGE", msg.data);
+        },
+        votepage: function (msg) {
+            this.$store.commit("ADD_VOTE_PAGE", msg.data);
+        },
         waitimage: function () {
             this.$socket.emit('image', this.$store.state.image);
         },
@@ -122,6 +138,9 @@ export default {
     computed: {
         getGameState() {
             return this.$store.state.gameState
+        },
+        getPage() {
+            return this.$store.state.page.page
         }
     }
 

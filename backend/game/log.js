@@ -48,6 +48,10 @@ logList[213] = 'Image uploaded'
 logList[214] = 'Wait all images'
 logList[215] = 'All images receive'
 logList[216] = ' change name to '
+logList[217] = 'Choose Page'
+logList[218] = 'Choose Page Over'
+logList[219] = 'Vote Page'
+logList[220] = 'Vote Page Over'
 
 
 /**

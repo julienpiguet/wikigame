@@ -11,9 +11,13 @@ export default createStore({
     image: "",
     timer: 0,
     vote: "",
+    choicePages: [],
+    choice: "",
+    votePages: [],
+    votePage: "",
     images: [],
     scoreboard: [],
-    logs: []
+    logs: [],
   },
   getters: {
   },
@@ -65,17 +69,33 @@ export default createStore({
     ADD_IMAGE(state, image){
       state.images.push(image);
     },
+    ADD_CHOICE_PAGE(state, page){
+      state.choicePages.push(page);
+    },
+    ADD_VOTE_PAGE(state, page){
+      state.votePages.push(page);
+    },
     SET_TIMER(state, timer){
       state.timer = timer;
     },
     SET_VOTE(state, vote){
       state.vote = vote;
     },
+    SET_PAGE_CHOICE(state, choice){
+      state.choice = choice;
+    },
+    SET_PAGE_VOTE(state, vote){
+      state.votePage = vote;
+    },
     RESET_GAME_DATA(state){
       state.page = null;
       state.image = "";
       state.images = [];
       state.vote = "";
+      state.choice = "";
+      state.votePage = "";
+      state.choicePages = [];
+      state.votePages = [];
     },
   },
   actions: {
