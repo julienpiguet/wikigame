@@ -23,6 +23,8 @@ var logList = []
  logList[110] = 'room'
  logList[111] = 'waitimage'
  logList[112] = 'chatmsg'
+ logList[113] = 'pagevotes'
+
 
 
 

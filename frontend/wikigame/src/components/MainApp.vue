@@ -90,7 +90,7 @@ export default {
     sockets: {
         state: function (msg) {
             this.$store.commit('SET_STATE', msg.data)
-            if (msg.data=="getpage") this.$store.commit('RESET_GAME_DATA');
+            if (msg.data=="getpages") this.$store.commit('RESET_GAME_DATA');
         },
         log: function (msg) {
             if (msg.id >= 300)

@@ -30,17 +30,33 @@ export default createStore({
     SOCKET_DISCONNECT(state) {
       state.isConnected = false;
       state.gameState = "idle";
-      state.roomId = "",
-      state.isOwner = false,
-      state.scoreboard = [],
-      state.logs = []
+      state.roomId = "";
+      state.isOwner = false;
+      state.scoreboard = [];
+      state.logs = [];
+      state.page = null;
+      state.image = "";
+      state.images = [];
+      state.vote = "";
+      state.choice = "";
+      state.votePage = "";
+      state.choicePages = [];
+      state.votePages = [];
     },
     RESET(state){
-      state.gameState = "idle",
-      state.roomId = "",
-      state.isOwner = false,
-      state.scoreboard = [],
-      state.logs = []
+      state.gameState = "idle";
+      state.roomId = "";
+      state.isOwner = false;
+      state.scoreboard = [];
+      state.logs = [];
+      state.page = null;
+      state.image = "";
+      state.images = [];
+      state.vote = "";
+      state.choice = "";
+      state.votePage = "";
+      state.choicePages = [];
+      state.votePages = [];
     },
     SET_STATE(state, stateName){
       state.gameState = stateName;
